@@ -4,6 +4,10 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 const mongoose = require("mongoose");
+const exphbs = require("express-handlebars");
+
+app.engine("handlebars", exphbs());
+app.set("view engine", "handlebars");
 
 mongoose.connect(process.env.DATABASE_URL, {
   useNewUrlParser: true,

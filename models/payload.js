@@ -5,7 +5,7 @@ const payloadSchema = new mongoose.Schema({
     type: Array,
     required: true,
   },
-  body: {
+  rawBody: {
     type: JSON,
     required: true,
   },
