@@ -1,30 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const Payload = require("../models/payload");
+const { Pool, Client } = require("pg");
+const client = new Client();
+const pool = new Pool();
 
 router.get("/", async (req, res) => {
   try {
     const payloads = await Payload.find().lean();
-    console.log(payloads);
     res.render("index", {
-      title: "Payloads App", payloads,
-      helpers: { stringify: (data) => JSON.stringify(data) }
+      title: "Payloads App",
+      payloads,
+      helpers: { stringify: (data) => JSON.stringify(data) },
     });
   } catch (e) {
     res.status(500).json({ message: e.message });
-  } finally {
   }
 });
 
-// Getting one
-// router.get("/:id", getPayload, (req, res) => {
-//   const headers = JSON.stringify(res.payload.headers)
-//   const rawBody = JSON.stringify(res.payload.rawBody)
-//   res.render("show", { title: res.payload.id, headers, rawBody });
-//   // res.json(res.payload);
-// });
-
-// Creating onc
 router.post("/", async (req, res) => {
   const payload = new Payload({
     headers: req.headers,
@@ -33,9 +26,17 @@ router.post("/", async (req, res) => {
 
   try {
     const newPayload = await payload.save();
-    res.status(201).json(newPayload);
+    const query = `
+      INSERT INTO payloadsrdb (payload_id)
+      VALUES ('${newPayload.id}');
+    `;
+
+    await pool.query(query)
+    await client.close();
+    res.sendStatus(201);
   } catch (e) {
     res.status(400).json({ message: e.message });
+    return;
   }
 });
 
